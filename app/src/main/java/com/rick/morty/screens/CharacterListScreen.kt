@@ -48,7 +48,12 @@ fun CharacterListScreen(viewModel: MainViewModel) {
         }
         is CharactersStates.SUCCESS -> {
             LazyColumn(
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = 16.dp,
+                    end = 16.dp,
+                    bottom = 80.dp // Ensure space is reserved for the BottomNavigation
+                ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items((characterState as CharactersStates.SUCCESS).dataModel.results) { character ->

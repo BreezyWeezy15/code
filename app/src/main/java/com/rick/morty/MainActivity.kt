@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,15 +31,14 @@ class MainActivity : ComponentActivity() {
                 bottomBar = {
                     BottomNavigationBar(navController)
                 }
-            ) {
+            ) { paddingValues ->
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.CharacterListScreen.route
+                    startDestination = Screen.CharacterListScreen.route,
+                    modifier = Modifier.padding(paddingValues)
                 ) {
                     composable(Screen.CharacterListScreen.route) {
-                        CharacterListScreen(
-                            viewModel = viewModel,
-                        )
+                        CharacterListScreen(viewModel = viewModel)
                     }
                     composable(Screen.CharacterScreen.route) {
                         CharacterScreen(viewModel = viewModel)
