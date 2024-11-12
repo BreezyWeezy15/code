@@ -1,5 +1,6 @@
 package com.rick.morty.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,6 +65,9 @@ fun CharacterScreen(viewModel: MainViewModel) {
 
     val snackbarHostState = remember { SnackbarHostState() }
     var deletedCharacter: CharacterEntity? by remember { mutableStateOf(null) }
+
+    // Toast state
+    val context = LocalContext.current
 
     // Handle undo snack action
     LaunchedEffect(deletedCharacter) {
@@ -102,7 +107,14 @@ fun CharacterScreen(viewModel: MainViewModel) {
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(
-                        onClick = { showDeleteAllDialog = true },
+                        onClick = {
+                            if (localCharacters.isEmpty()) {
+                                // Show toast if there are no characters
+                                Toast.makeText(context, "There are no characters to remove", Toast.LENGTH_SHORT).show()
+                            } else {
+                                showDeleteAllDialog = true
+                            }
+                        },
                         modifier = Modifier
                             .background(Color.Gray, CircleShape)
                             .size(40.dp)
@@ -183,20 +195,14 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
     SwipeToDismiss(
         state = dismissState,
         background = {
-            // Remove the red background, leaving this Box empty or adding subtle UI elements if desired
+            // Box remains empty or can be customized further if needed
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Optional: Add subtle icons or text as a hint for swipe direction
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(30.dp)
-                )
+                // No Icon or additional elements
             }
         },
         dismissContent = {
@@ -233,5 +239,7 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
         }
     )
 }
+
+
 
 
