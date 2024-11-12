@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rick.morty.business.MainViewModel
 import com.rick.morty.screens.CharacterListScreen
 import com.rick.morty.screens.CharacterScreen
+import com.rick.morty.screens.CustomFeature
 import com.rick.morty.screens.InsertCharacterScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,6 +49,9 @@ class MainActivity : ComponentActivity() {
                             viewModel = viewModel,
                             onCharacterInserted = { navController.popBackStack() }
                         )
+                    }
+                    composable(Screen.CustomFeatureScreen.route) { // Add this block
+                        CustomFeature()
                     }
                 }
             }

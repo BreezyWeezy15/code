@@ -18,13 +18,14 @@ fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         Screen.CharacterListScreen,
         Screen.CharacterScreen,
-        Screen.InsertCharacterScreen
+        Screen.InsertCharacterScreen,
+        Screen.CustomFeatureScreen // Add this line
     )
 
     BottomNavigation(
-        backgroundColor = MaterialTheme.colorScheme.primary, // Set background color
-        elevation = 8.dp, // Add elevation for better depth
-        modifier = Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)) // Rounded corners
+        backgroundColor = MaterialTheme.colorScheme.primary,
+        elevation = 8.dp,
+        modifier = Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
     ) {
         val currentBackStackEntry = navController.currentBackStackEntryAsState()
         val currentDestination = currentBackStackEntry.value?.destination
@@ -36,9 +37,9 @@ fun BottomNavigationBar(navController: NavHostController) {
                         screen.icon,
                         contentDescription = screen.label,
                         tint = if (currentDestination?.route == screen.route) {
-                            MaterialTheme.colorScheme.onPrimary // Highlight selected icon
+                            MaterialTheme.colorScheme.onPrimary
                         } else {
-                            MaterialTheme.colorScheme.onSurface // Default icon color
+                            MaterialTheme.colorScheme.onSurface
                         }
                     )
                 },
@@ -46,16 +47,15 @@ fun BottomNavigationBar(navController: NavHostController) {
                     Text(
                         screen.label,
                         color = if (currentDestination?.route == screen.route) {
-                            MaterialTheme.colorScheme.onPrimary // Highlight label
+                            MaterialTheme.colorScheme.onPrimary
                         } else {
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f) // Dim label when unselected
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         }
                     )
                 },
                 selected = currentDestination?.route == screen.route,
                 onClick = {
                     navController.navigate(screen.route) {
-                        // Avoid multiple copies of the same destination
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
