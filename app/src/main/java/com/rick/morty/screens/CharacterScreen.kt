@@ -2,12 +2,14 @@ package com.rick.morty.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,39 +42,74 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
+import com.rick.morty.R
 import com.rick.morty.business.MainViewModel
 import com.rick.morty.db.CharacterEntity
 import com.rick.morty.states.CharactersStates
 
 @Composable
 fun CharacterScreen(viewModel: MainViewModel) {
-    val localCharacters by viewModel.localCharacters.collectAsState()
+    // Get local characters from ViewModel
+    val localCharacters by viewModel.localCharacters.collectAsState(emptyList()) // Default to empty list
 
     // Confirmation dialog state
     var showDeleteAllDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Show local database characters
-        LazyColumn {
-            items(localCharacters, key = { it.characterId!! }) { character ->
-                SwipeToDismissCard(character, onDelete = {
-                    viewModel.deleteCharacter(character)
-                })
+        // Row with "My Characters" text and "Delete All" icon button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "My Characters",
+                style = MaterialTheme.typography.titleLarge, // Made the title slightly bigger
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(
+                onClick = { showDeleteAllDialog = true },
+                modifier = Modifier
+                    .background(Color.Gray, CircleShape)
+                    .size(40.dp)
+                    .padding(8.dp) // Added padding for circular effect
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete All", tint = Color.White,
+                    modifier = Modifier.size(25.dp))
             }
         }
 
-        // Button to delete all characters with a confirmation dialog
-        Button(
-            onClick = { showDeleteAllDialog = true },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        ) {
-            Text("Delete All Characters")
+        Spacer(modifier = Modifier.height(16.dp)) // Spacer between title and the list
+
+        // Check if the list is empty
+        if (localCharacters.isEmpty()) {
+            // Check if there is no error (i.e., just no data)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.no_data), // Drawable image for no data
+                    contentDescription = "No Data",
+                    modifier = Modifier.size(140.dp) // Adjust size of the image to make it smaller
+                )
+            }
+        } else {
+            // Show local database characters in a LazyColumn
+            LazyColumn {
+                items(localCharacters, key = { it.characterId!! }) { character ->
+                    SwipeToDismissCard(character, onDelete = {
+                        viewModel.deleteCharacter(character)
+                    })
+                }
+            }
         }
 
-        // Dialog for confirmation
+        // Dialog for confirmation to delete all characters
         if (showDeleteAllDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteAllDialog = false },
@@ -116,7 +153,6 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Red)
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
@@ -131,6 +167,7 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
                     .padding(vertical = 4.dp)
             ) {
                 Row(modifier = Modifier.padding(16.dp)) {
+                    // Image
                     Image(
                         painter = rememberImagePainter(character.image),
                         contentDescription = "Character Image",
@@ -138,17 +175,33 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
                             .size(64.dp)
                             .clip(CircleShape)
                             .background(Color.Gray)
+                            .fillMaxSize() // Ensure image covers the entire ImageView
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Column {
+
+                    // Character details
+                    Column(
+                        modifier = Modifier.weight(1f) // Ensure the text takes available space
+                    ) {
                         Text(text = character.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                         Text(text = "Species: ${character.species}")
                         Text(text = "Gender: ${character.gender}")
                         Text(text = "Status: ${character.status}")
+                    }
+
+                    // Delete icon in row
+                    IconButton(
+                        onClick = { onDelete() },
+                        modifier = Modifier
+                            .background(Color.Gray, CircleShape)
+                            .padding(8.dp) // Added padding for circular effect
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
                     }
                 }
             }
         }
     )
 }
+
 
