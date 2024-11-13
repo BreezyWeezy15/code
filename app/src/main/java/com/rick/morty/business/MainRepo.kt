@@ -1,6 +1,6 @@
 package com.rick.morty.business
 
-import com.rick.morty.db.CharacterEntity
+import com.rick.morty.models.CharacterEntity
 import com.rick.morty.models.DataModel
 import kotlinx.coroutines.flow.Flow
 

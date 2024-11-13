@@ -1,7 +1,9 @@
 package com.rick.morty.screens
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -40,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.rick.morty.business.MainViewModel
-import com.rick.morty.db.CharacterEntity
+import com.rick.morty.models.CharacterEntity
 
 @Composable
 fun InsertCharacterScreen(viewModel: MainViewModel) {
@@ -71,112 +73,127 @@ fun InsertCharacterScreen(viewModel: MainViewModel) {
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Create New Character",
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        TitleText() // Restore the title here
 
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(Color.Gray)
-                .clickable { launcher.launch("image/*") },
-            contentAlignment = Alignment.Center
-        ) {
-            if (imageUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(imageUri),
-                    contentDescription = "Selected Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                            .size(64.dp)
-                            .aspectRatio(1f)
-                            .clip(CircleShape)
-                )
-            } else {
-                Text(text = "Pick Image", color = Color.White)
+        ProfileImageSelector(imageUri, launcher)
+
+        InputField(label = "Character Name", value = characterName, onValueChange = { characterName = it })
+        InputField(label = "Species", value = species, onValueChange = { species = it })
+        InputField(label = "Gender", value = gender, onValueChange = { gender = it })
+        InputField(label = "Status", value = status, onValueChange = { status = it })
+        InputField(label = "Character Type", value = characterType, onValueChange = { characterType = it })
+
+        SaveButton(
+            characterName,
+            species,
+            gender,
+            status,
+            characterType,
+            imageByteArray,
+            context,
+            viewModel,
+            onSuccess = {
+                characterName = ""
+                species = ""
+                gender = ""
+                status = ""
+                characterType = ""
+                imageUri = null
+                imageByteArray = null
             }
-        }
-
-        OutlinedTextField(
-            value = characterName,
-            onValueChange = { characterName = it },
-            label = { Text("Character Name") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
         )
+    }
+}
 
-        OutlinedTextField(
-            value = species,
-            onValueChange = { species = it },
-            label = { Text("Species") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = gender,
-            onValueChange = { gender = it },
-            label = { Text("Gender") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = status,
-            onValueChange = { status = it },
-            label = { Text("Status") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = characterType,
-            onValueChange = { characterType = it },
-            label = { Text("Character Type") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        Button(
-            onClick = {
-                if (characterName.isNotBlank() && species.isNotBlank() && gender.isNotBlank() && status.isNotBlank() && characterType.isNotBlank() && imageByteArray != null) {
-                    val newCharacter = CharacterEntity(
-                        name = characterName,
-                        species = species,
-                        gender = gender,
-                        status = status,
-                        type = characterType,
-                        created = "2024-11-12",
-                        image = imageByteArray!!
-                    )
-                    viewModel.insertCharacter(newCharacter)
-                    // Reset fields and image after insertion
-                    characterName = ""
-                    species = ""
-                    gender = ""
-                    status = ""
-                    characterType = ""
-                    imageUri = null
-                    imageByteArray = null
-                    Toast.makeText(context, "Character inserted", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "All fields and an image must be filled", Toast.LENGTH_SHORT).show()
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(45.dp)
-                .clip(RoundedCornerShape(12.dp))
-        ) {
-            Text(
-                text = "Save Character",
-                color = Color.White,
-                style = MaterialTheme.typography.button
+@Composable
+fun TitleText() {
+    Text(
+        text = "Create New Character",
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
+}
+@Composable
+fun ProfileImageSelector(imageUri: Uri?, launcher: ManagedActivityResultLauncher<String, Uri?>) {
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .clip(CircleShape)
+            .background(Color.Gray)
+            .clickable { launcher.launch("image/*") }, // Call launch directly on the launcher
+        contentAlignment = Alignment.Center
+    ) {
+        if (imageUri != null) {
+            Image(
+                painter = rememberAsyncImagePainter(imageUri),
+                contentDescription = "Selected Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+                    .size(64.dp)
+                    .aspectRatio(1f)
+                    .clip(CircleShape)
             )
+        } else {
+            Text(text = "Pick Image", color = Color.White)
         }
     }
 }
+
+
+@Composable
+fun InputField(label: String, value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+@Composable
+fun SaveButton(
+    characterName: String,
+    species: String,
+    gender: String,
+    status: String,
+    characterType: String,
+    imageByteArray: ByteArray?,
+    context: Context,
+    viewModel: MainViewModel,
+    onSuccess: () -> Unit
+) {
+    Button(
+        onClick = {
+            if (characterName.isNotBlank() && species.isNotBlank() && gender.isNotBlank() && status.isNotBlank() && characterType.isNotBlank() && imageByteArray != null) {
+                val newCharacter = CharacterEntity(
+                    name = characterName,
+                    species = species,
+                    gender = gender,
+                    status = status,
+                    type = characterType,
+                    created = "2024-11-12",
+                    image = imageByteArray
+                )
+                viewModel.insertCharacter(newCharacter)
+                onSuccess()
+
+                Toast.makeText(context, "Character inserted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "All fields and an image must be filled", Toast.LENGTH_SHORT).show()
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(45.dp)
+            .clip(RoundedCornerShape(12.dp))
+    ) {
+        Text(
+            text = "Save Character",
+            color = Color.White,
+            style = MaterialTheme.typography.button
+        )
+    }
+}
+

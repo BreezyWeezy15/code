@@ -1,6 +1,5 @@
 package com.rick.morty.business
 
-import android.net.http.HttpException
 import androidx.lifecycle.ViewModel
 import com.rick.morty.states.CharactersStates
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,7 +7,7 @@ import javax.inject.Inject
 
 
 import androidx.lifecycle.viewModelScope
-import com.rick.morty.db.CharacterEntity
+import com.rick.morty.models.CharacterEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest

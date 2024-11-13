@@ -1,9 +1,8 @@
 package com.rick.morty.business
 
 import com.rick.morty.db.CharacterDao
-import com.rick.morty.db.CharacterEntity
+import com.rick.morty.models.CharacterEntity
 import com.rick.morty.models.DataModel
-import com.rick.morty.models.Info
 import com.rick.morty.services.AuthService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

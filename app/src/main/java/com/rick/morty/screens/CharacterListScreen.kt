@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -34,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.rick.morty.business.MainViewModel
 import com.rick.morty.models.Result
 import com.rick.morty.states.CharactersStates
@@ -44,38 +43,39 @@ fun CharacterListScreen(viewModel: MainViewModel) {
     val characterState by viewModel.characterState.collectAsState()
 
     when (characterState) {
-        is CharactersStates.LOADING -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
+        is CharactersStates.LOADING -> LoadingState()
         is CharactersStates.SUCCESS -> {
             val characters = (characterState as CharactersStates.SUCCESS).dataModel.results
             if (characters.isEmpty()) {
                 NoDataIcon(message = "No characters available.")
             } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        top = 16.dp,
-                        end = 16.dp,
-                        bottom = 80.dp
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(characters) { character ->
-                        CharacterItem(character)
-                    }
-                }
+                CharacterList(characters)
             }
         }
-        is CharactersStates.ERROR -> {
-            NoDataIcon(message = (characterState as CharactersStates.ERROR).error)
-        }
+        is CharactersStates.ERROR -> NoDataIcon(message = (characterState as CharactersStates.ERROR).error)
         else -> { /* No state */ }
+    }
+}
+
+@Composable
+fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun CharacterList(characters: List<Result>) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(characters) { character ->
+            CharacterItem(character)
+        }
     }
 }
 
@@ -115,47 +115,48 @@ fun CharacterItem(character: Result) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
-            // Image with dynamic height to fit based on content
-            Image(
-                painter = rememberImagePainter(character.image),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(120.dp) // Fixed width
-                    .fillMaxHeight() // Make sure it fits vertically within the row
-                    .clip(RoundedCornerShape(12.dp))
-                    .aspectRatio(1f) // Keep aspect ratio consistent
-            )
+            CharacterImage(imageUrl = character.image)
             Spacer(modifier = Modifier.width(12.dp))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                Text(
-                    text = character.name,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Gender: ${character.gender}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Species: ${character.species}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Status: ${character.status}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Location: ${character.location.name}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Origin: ${character.origin.name}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            CharacterInfoColumn(character = character)
         }
     }
 }
 
+@Composable
+fun CharacterImage(imageUrl: String) {
+    Image(
+        painter = rememberAsyncImagePainter(imageUrl),
+        contentDescription = null,
+        modifier = Modifier
+            .width(120.dp)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(12.dp))
+            .aspectRatio(1f) // Keeps the aspect ratio consistent for the image
+    )
+}
+
+@Composable
+fun CharacterInfoColumn(character: Result) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.fillMaxHeight()
+    ) {
+        Text(
+            text = character.name,
+            style = MaterialTheme.typography.titleMedium
+        )
+        CharacterInfoRow(label = "Gender", value = character.gender)
+        CharacterInfoRow(label = "Species", value = character.species)
+        CharacterInfoRow(label = "Status", value = character.status)
+        CharacterInfoRow(label = "Location", value = character.location.name)
+        CharacterInfoRow(label = "Origin", value = character.origin.name)
+    }
+}
+
+@Composable
+fun CharacterInfoRow(label: String, value: String) {
+    Text(
+        text = "$label: $value",
+        style = MaterialTheme.typography.bodySmall
+    )
+}

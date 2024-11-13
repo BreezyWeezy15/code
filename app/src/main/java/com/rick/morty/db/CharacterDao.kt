@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.rick.morty.models.CharacterEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,5 +21,5 @@ interface CharacterDao {
     suspend fun deleteCharacter(character: CharacterEntity)
 
     @Query("DELETE FROM characters")
-    suspend fun deleteAllCharacters()  // New method to delete all characters
+    suspend fun deleteAllCharacters()
 }

@@ -1,4 +1,4 @@
-package com.rick.morty
+package com.rick.morty.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation

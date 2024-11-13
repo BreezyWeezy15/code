@@ -22,62 +22,81 @@ import com.rick.morty.business.MainViewModel
 import com.rick.morty.models.*
 import com.rick.morty.states.CharactersStates
 
-
 @Composable
 fun CharacterSelectionScreen(mainViewModel: MainViewModel) {
     var selectedCharacters by remember { mutableStateOf<List<Result>>(emptyList()) }
     var isBottomSheetVisible by remember { mutableStateOf(false) }
     val characterState = mainViewModel.characterState.collectAsState()
 
+    // Show Loading UI
     when (characterState.value) {
         is CharactersStates.LOADING -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
+
+        // Show Success with character list
         is CharactersStates.SUCCESS -> {
             val characters = (characterState.value as CharactersStates.SUCCESS).dataModel.results
             if (characters.isEmpty()) {
                 NoDataIcon(message = "No characters available.")
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(characters) { character ->
-                        val isSelected = selectedCharacters.contains(character)
-                        CharacterItem(
-                            character = character,
-                            isSelected = isSelected,
-                            onSelect = {
-                                if (!isSelected && selectedCharacters.size < 2) {
-                                    selectedCharacters = selectedCharacters + character
-                                }
-                                if (selectedCharacters.size == 2) {
-                                    isBottomSheetVisible = true
-                                }
-                            }
-                        )
+                CharacterGrid(
+                    characters = characters,
+                    selectedCharacters = selectedCharacters,
+                    onCharacterSelect = { character ->
+                        if (!selectedCharacters.contains(character) && selectedCharacters.size < 2) {
+                            selectedCharacters = selectedCharacters + character
+                        }
+                        if (selectedCharacters.size == 2) {
+                            isBottomSheetVisible = true
+                        }
                     }
-                }
+                )
             }
         }
+
+        // Show Error UI
         is CharactersStates.ERROR -> {
             NoDataIcon(message = (characterState.value as CharactersStates.ERROR).error)
         }
 
-        CharactersStates.INITIAL -> TODO()
+        // Initial State: Placeholder
+        CharactersStates.INITIAL -> Unit
     }
 
+    // Show Bottom Sheet when two characters are selected
     if (isBottomSheetVisible) {
         BottomSheetDialog(selectedCharacters) {
             selectedCharacters = emptyList()
             isBottomSheetVisible = false
+        }
+    }
+}
+
+@Composable
+fun CharacterGrid(
+    characters: List<Result>,
+    selectedCharacters: List<Result>,
+    onCharacterSelect: (Result) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(characters) { character ->
+            val isSelected = selectedCharacters.contains(character)
+            CharacterItem(
+                character = character,
+                isSelected = isSelected,
+                onSelect = { onCharacterSelect(character) }
+            )
         }
     }
 }
@@ -130,7 +149,7 @@ fun BottomSheetDialog(selectedCharacters: List<Result>, onDismiss: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp), // Reduce padding for equal width
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -165,13 +184,13 @@ fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
                 modifier = Modifier
                     .height(150.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp)) // Apply the clip to the Box container
+                    .clip(RoundedCornerShape(12.dp))
             ) {
                 Image(
                     painter = painter,
                     contentDescription = character.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.matchParentSize() // Fill the Box, ensuring clipping happens
+                    modifier = Modifier.matchParentSize()
                 )
             }
 
@@ -193,8 +212,6 @@ fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
     }
 }
 
-
-
 @Composable
 fun CharacterInfoText(label: String, value: String) {
     Text(
@@ -205,3 +222,4 @@ fun CharacterInfoText(label: String, value: String) {
         overflow = TextOverflow.Ellipsis
     )
 }
+

@@ -1,4 +1,4 @@
-package com.rick.morty.db
+package com.rick.morty.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

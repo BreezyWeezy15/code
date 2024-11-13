@@ -1,19 +1,10 @@
+
 package com.rick.morty.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -24,24 +15,8 @@ import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberDismissState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,10 +26,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.rick.morty.R
 import com.rick.morty.business.MainViewModel
-import com.rick.morty.db.CharacterEntity
+import com.rick.morty.models.CharacterEntity
 
 @Composable
 fun CharacterScreen(viewModel: MainViewModel) {
@@ -86,81 +62,96 @@ fun CharacterScreen(viewModel: MainViewModel) {
                     .padding(16.dp)
                     .padding(paddingValues)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "My Characters",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(
-                        onClick = {
-                            if (localCharacters.isEmpty()) {
-                                Toast.makeText(context, "There are no characters to remove", Toast.LENGTH_SHORT).show()
-                            } else {
-                                showDeleteAllDialog = true
-                            }
-                        },
-                        modifier = Modifier
-                            .background(Color.Gray, CircleShape)
-                            .size(40.dp)
-                            .padding(8.dp)
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete All", tint = Color.White,
-                            modifier = Modifier.size(25.dp))
-                    }
-                }
+                // Pass only the callback to trigger the delete all dialog
+                HeaderSection(
+                    localCharacters = localCharacters,
+                    onDeleteAllClick = { showDeleteAllDialog = true },
+                    context = context
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (localCharacters.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.no_data),
-                            contentDescription = "No Data",
-                            modifier = Modifier.size(140.dp)
-                        )
-                    }
+                    EmptyStateView()
                 } else {
-                    LazyColumn {
-                        items(localCharacters, key = { it.characterId!! }) { character ->
-                            SwipeToDismissCard(character, onDelete = {
-                                deletedCharacter = character
-                                viewModel.deleteCharacter(character)
-                            })
-                        }
-                    }
+                    CharacterList(localCharacters, onDeleteCharacter = { character ->
+                        deletedCharacter = character
+                        viewModel.deleteCharacter(character)
+                    })
                 }
 
-                if (showDeleteAllDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDeleteAllDialog = false },
-                        title = { Text("Confirm Delete") },
-                        text = { Text("Are you sure you want to delete all characters? This action cannot be undone.") },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                viewModel.deleteAllCharacters()
-                                showDeleteAllDialog = false
-                            }) {
-                                Text("Yes", color = MaterialTheme.colorScheme.error)
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDeleteAllDialog = false }) {
-                                Text("No")
-                            }
-                        }
-                    )
-                }
+                // Delete All Dialog managed by CharacterScreen
+                DeleteAllDialog(
+                    showDialog = showDeleteAllDialog,
+                    onDismiss = { showDeleteAllDialog = false },
+                    onDeleteAll = {
+                        viewModel.deleteAllCharacters()
+                        showDeleteAllDialog = false
+                    }
+                )
             }
         }
     )
+}
+
+@Composable
+fun HeaderSection(
+    localCharacters: List<CharacterEntity>,
+    onDeleteAllClick: () -> Unit,
+    context: android.content.Context
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "My Characters",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(
+            onClick = {
+                if (localCharacters.isEmpty()) {
+                    Toast.makeText(context, "There are no characters to remove", Toast.LENGTH_SHORT).show()
+                } else {
+                    onDeleteAllClick() // Triggers the delete all dialog
+                }
+            },
+            modifier = Modifier
+                .background(Color.Gray, CircleShape)
+                .size(40.dp)
+                .padding(8.dp)
+        ) {
+            Icon(Icons.Default.Delete, contentDescription = "Delete All", tint = Color.White, modifier = Modifier.size(25.dp))
+        }
+    }
+}
+
+@Composable
+fun EmptyStateView() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.no_data),
+            contentDescription = "No Data",
+            modifier = Modifier.size(140.dp)
+        )
+    }
+}
+
+@Composable
+fun CharacterList(
+    localCharacters: List<CharacterEntity>,
+    onDeleteCharacter: (CharacterEntity) -> Unit
+) {
+    LazyColumn {
+        items(localCharacters, key = { it.characterId!! }) { character ->
+            SwipeToDismissCard(character, onDelete = { onDeleteCharacter(character) })
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -188,36 +179,62 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
             ) {}
         },
         dismissContent = {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                Row(modifier = Modifier.padding(16.dp)) {
-                    Image(
-                        painter = rememberImagePainter(character.image),
-                        contentDescription = "Character Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(text = character.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                        Text(text = "Species: ${character.species}")
-                        Text(text = "Gender: ${character.gender}")
-                        Text(text = "Status: ${character.status}")
-                    }
-                }
-            }
+            CharacterRow(character = character)
         }
     )
 }
 
+@Composable
+fun CharacterRow(character: CharacterEntity) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Image(
+                painter = rememberAsyncImagePainter(character.image),
+                contentDescription = "Character Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
 
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = character.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                Text(text = "Species: ${character.species}")
+                Text(text = "Gender: ${character.gender}")
+                Text(text = "Status: ${character.status}")
+            }
+        }
+    }
+}
+
+@Composable
+fun DeleteAllDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onDeleteAll: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Confirm Delete") },
+            text = { Text("Are you sure you want to delete all characters? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = onDeleteAll) {
+                    Text("Yes", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("No")
+                }
+            }
+        )
+    }
+}
