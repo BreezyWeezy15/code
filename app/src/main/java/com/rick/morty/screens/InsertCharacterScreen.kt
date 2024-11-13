@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -40,7 +42,7 @@ import com.rick.morty.business.MainViewModel
 import com.rick.morty.db.CharacterEntity
 
 @Composable
-fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> Unit) {
+fun InsertCharacterScreen(viewModel: MainViewModel) {
     val context = LocalContext.current
     var characterName by remember { mutableStateOf("") }
     var species by remember { mutableStateOf("") }
@@ -59,10 +61,13 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
         }
     }
 
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
@@ -145,7 +150,15 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
                         image = imageByteArray!!
                     )
                     viewModel.insertCharacter(newCharacter)
-                    onCharacterInserted()
+                    // Reset fields and image after insertion
+                    characterName = ""
+                    species = ""
+                    gender = ""
+                    status = ""
+                    characterType = ""
+                    imageUri = null
+                    imageByteArray = null
+                    Toast.makeText(context, "Character inserted", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "All fields and an image must be filled", Toast.LENGTH_SHORT).show()
                 }

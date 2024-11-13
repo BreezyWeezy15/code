@@ -17,7 +17,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,9 +27,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rick.morty.models.quizQuestions
@@ -38,7 +37,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun CharacterComparisonTool() {
+fun QuizScreen() {
     var currentQuestionIndex by remember { mutableIntStateOf(0) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
     var score by remember { mutableIntStateOf(0) }
@@ -72,50 +71,45 @@ fun CharacterComparisonTool() {
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Rick and Morty Quiz",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Test your knowledge about Rick and Morty!",
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 2,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Score: $score/${quizQuestions.size}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            // Title and explanation
+            Text(
+                text = "Rick and Morty Quiz",
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Test your knowledge about Rick and Morty!",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
+            // Question number and score, aligned to the left
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.Start // Aligns content to the left side
             ) {
                 Text(
                     text = "Question ${currentQuestionIndex + 1}/${quizQuestions.size}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Score: $score/${quizQuestions.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Question text
             Text(
                 text = question.question,
                 style = MaterialTheme.typography.bodyLarge,
@@ -123,6 +117,7 @@ fun CharacterComparisonTool() {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Options
             question.options.forEach { option ->
                 OptionButton(
                     option = option,
@@ -154,6 +149,7 @@ fun CharacterComparisonTool() {
         }
     }
 }
+
 
 @Composable
 fun OptionButton(option: String, isSelected: Boolean, isCorrect: Boolean, isWrong: Boolean, onClick: () -> Unit) {
