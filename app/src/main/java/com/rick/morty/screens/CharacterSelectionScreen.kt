@@ -24,31 +24,40 @@ import com.rick.morty.states.CharactersStates
 
 @Composable
 fun CharacterSelectionScreen(mainViewModel: MainViewModel) {
+    // State to track selected characters and visibility of the bottom sheet
     var selectedCharacters by remember { mutableStateOf<List<Result>>(emptyList()) }
     var isBottomSheetVisible by remember { mutableStateOf(false) }
+
+    // Observing the state of character data from ViewModel
     val characterState = mainViewModel.characterState.collectAsState()
 
-    // Show Loading UI
+    // Handle different states of character data (loading, success, error, initial)
     when (characterState.value) {
         is CharactersStates.LOADING -> {
+            // Show loading indicator while data is being fetched
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                CircularProgressIndicator() // Circular progress indicator to indicate loading
             }
         }
 
-        // Show Success with character list
         is CharactersStates.SUCCESS -> {
+            // When characters data is successfully fetched
             val characters = (characterState.value as CharactersStates.SUCCESS).dataModel.results
+
+            // If no characters are available, show a no-data message
             if (characters.isEmpty()) {
                 NoDataIcon(message = "No characters available.")
             } else {
+                // Show the character grid for selection
                 CharacterGrid(
                     characters = characters,
                     selectedCharacters = selectedCharacters,
                     onCharacterSelect = { character ->
+                        // Handle character selection (up to 2 characters)
                         if (!selectedCharacters.contains(character) && selectedCharacters.size < 2) {
                             selectedCharacters = selectedCharacters + character
                         }
+                        // When 2 characters are selected, show the bottom sheet
                         if (selectedCharacters.size == 2) {
                             isBottomSheetVisible = true
                         }
@@ -57,18 +66,19 @@ fun CharacterSelectionScreen(mainViewModel: MainViewModel) {
             }
         }
 
-        // Show Error UI
         is CharactersStates.ERROR -> {
+            // Show error message if there was an issue fetching data
             NoDataIcon(message = (characterState.value as CharactersStates.ERROR).error)
         }
 
-        // Initial State: Placeholder
+        // Placeholder for the initial state (no data)
         CharactersStates.INITIAL -> Unit
     }
 
     // Show Bottom Sheet when two characters are selected
     if (isBottomSheetVisible) {
         BottomSheetDialog(selectedCharacters) {
+            // Reset selected characters and hide the bottom sheet
             selectedCharacters = emptyList()
             isBottomSheetVisible = false
         }
@@ -81,16 +91,19 @@ fun CharacterGrid(
     selectedCharacters: List<Result>,
     onCharacterSelect: (Result) -> Unit
 ) {
+    // A grid to display the list of characters
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(2), // 2 columns in the grid
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp),
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(8.dp), // Padding inside the grid
+        verticalArrangement = Arrangement.spacedBy(8.dp), // Space between rows
+        horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between columns
     ) {
+        // Loop through the characters and display each one
         items(characters) { character ->
+            // Check if the character is selected
             val isSelected = selectedCharacters.contains(character)
             CharacterItem(
                 character = character,
@@ -103,22 +116,24 @@ fun CharacterGrid(
 
 @Composable
 fun CharacterItem(character: Result, isSelected: Boolean, onSelect: () -> Unit) {
+    // A card that represents each character item in the grid
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)
-            .clickable { onSelect() },
+            .clickable { onSelect() }, // On click, select the character
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 4.dp),
         colors = if (isSelected) CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-        else CardDefaults.cardColors()
+        else CardDefaults.cardColors() // Change appearance if selected
     ) {
+        // Column layout to display character image and name
         Column(
             modifier = Modifier
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val painter: Painter = rememberImagePainter(character.image)
+            val painter: Painter = rememberImagePainter(character.image) // Load character image
             Image(
                 painter = painter,
                 contentDescription = character.name,
@@ -126,14 +141,14 @@ fun CharacterItem(character: Result, isSelected: Boolean, onSelect: () -> Unit) 
                 modifier = Modifier
                     .height(150.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(12.dp)) // Clip the image with rounded corners
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = character.name,
+                text = character.name, // Display character name
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis // Ellipsis if name is too long
             )
         }
     }
@@ -143,6 +158,7 @@ fun CharacterItem(character: Result, isSelected: Boolean, onSelect: () -> Unit) 
 @Composable
 fun BottomSheetDialog(selectedCharacters: List<Result>, onDismiss: () -> Unit) {
     if (selectedCharacters.size == 2) {
+        // Show bottom sheet with details of the two selected characters
         ModalBottomSheet(
             onDismissRequest = onDismiss,
         ) {
@@ -153,9 +169,10 @@ fun BottomSheetDialog(selectedCharacters: List<Result>, onDismiss: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Display character details in columns
                 CharacterDetailsColumn(character = selectedCharacters[1], modifier = Modifier.weight(1f))
                 Text(
-                    text = "VS",
+                    text = "VS", // Separator between the two characters
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
@@ -167,6 +184,7 @@ fun BottomSheetDialog(selectedCharacters: List<Result>, onDismiss: () -> Unit) {
 
 @Composable
 fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
+    // A column displaying detailed information about a character
     Card(
         modifier = modifier
             .padding(4.dp),
@@ -179,7 +197,7 @@ fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
                 .padding(8.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            val painter: Painter = rememberImagePainter(character.image)
+            val painter: Painter = rememberImagePainter(character.image) // Load character image
             Box(
                 modifier = Modifier
                     .height(150.dp)
@@ -190,19 +208,20 @@ fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
                     painter = painter,
                     contentDescription = character.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.matchParentSize()
+                    modifier = Modifier.matchParentSize() // Fill the box with the image
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = character.name,
+                text = character.name, // Display character name
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 4.dp),
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis // Ellipsis for long names
             )
-            Divider()
+            Divider() // Divider between character name and details
+            // Display various character attributes
             CharacterInfoText(label = "Species", value = character.species)
             CharacterInfoText(label = "Gender", value = character.gender)
             CharacterInfoText(label = "Status", value = character.status)
@@ -214,12 +233,12 @@ fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
 
 @Composable
 fun CharacterInfoText(label: String, value: String) {
+    // Display a label-value pair for character details (e.g., species, gender)
     Text(
         text = "$label: $value",
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(vertical = 2.dp),
         maxLines = 2,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis // Ellipsis for long values
     )
 }
-
