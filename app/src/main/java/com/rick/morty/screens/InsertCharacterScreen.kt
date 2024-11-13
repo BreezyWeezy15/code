@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -91,6 +92,9 @@ fun InsertCharacterScreen(viewModel: MainViewModel) {
                     contentDescription = "Selected Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
+                            .size(64.dp)
+                            .aspectRatio(1f)
+                            .clip(CircleShape)
                 )
             } else {
                 Text(text = "Pick Image", color = Color.White)
