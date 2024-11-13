@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -114,21 +115,28 @@ fun CharacterItem(character: Result) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
+            // Image with dynamic height to fit based on content
             Image(
                 painter = rememberImagePainter(character.image),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(64.dp)
-                    .aspectRatio(1f)
-                    .clip(CircleShape)
+                    .width(120.dp) // Fixed width
+                    .fillMaxHeight() // Make sure it fits vertically within the row
+                    .clip(RoundedCornerShape(12.dp))
+                    .aspectRatio(1f) // Keep aspect ratio consistent
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxHeight()
             ) {
                 Text(
                     text = character.name,
                     style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Gender: ${character.gender}",
+                    style = MaterialTheme.typography.bodySmall
                 )
                 Text(
                     text = "Species: ${character.species}",
@@ -138,7 +146,16 @@ fun CharacterItem(character: Result) {
                     text = "Status: ${character.status}",
                     style = MaterialTheme.typography.bodySmall
                 )
+                Text(
+                    text = "Location: ${character.location.name}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Origin: ${character.origin.name}",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
 }
+

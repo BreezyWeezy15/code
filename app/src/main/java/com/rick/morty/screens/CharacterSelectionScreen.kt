@@ -134,22 +134,22 @@ fun BottomSheetDialog(selectedCharacters: List<Result>, onDismiss: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CharacterDetailsColumn(character = selectedCharacters[0])
+                CharacterDetailsColumn(character = selectedCharacters[1], modifier = Modifier.weight(1f))
                 Text(
                     text = "VS",
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                CharacterDetailsColumn(character = selectedCharacters[1])
+                CharacterDetailsColumn(character = selectedCharacters[0], modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-fun CharacterDetailsColumn(character: Result) {
+fun CharacterDetailsColumn(character: Result, modifier: Modifier) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(4.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(8.dp)
@@ -161,14 +161,20 @@ fun CharacterDetailsColumn(character: Result) {
             horizontalAlignment = Alignment.Start
         ) {
             val painter: Painter = rememberImagePainter(character.image)
-            Image(
-                painter = painter,
-                contentDescription = character.name,
+            Box(
                 modifier = Modifier
                     .height(150.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-            )
+                    .clip(RoundedCornerShape(12.dp)) // Apply the clip to the Box container
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = character.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize() // Fill the Box, ensuring clipping happens
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = character.name,
@@ -186,6 +192,7 @@ fun CharacterDetailsColumn(character: Result) {
         }
     }
 }
+
 
 
 @Composable
