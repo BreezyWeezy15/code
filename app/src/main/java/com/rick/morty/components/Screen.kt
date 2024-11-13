@@ -11,5 +11,5 @@ sealed class Screen(val route: String, val label: String, val icon: ImageVector)
     data object CharacterListScreen : Screen("character_home", "Home", Icons.Default.List)
     data object CharacterScreen : Screen("character_screen", "Characters", Icons.Default.Person)
     data object InsertCharacterScreen : Screen("insert_character", "Add", Icons.Default.Add)
-    data object CustomFeatureScreen : Screen("custom_feature", "Quiz", Icons.Default.Star) // New screen
+    data object CustomFeatureScreen : Screen("custom_feature", "Compare", Icons.Default.Star) // New screen
 }
