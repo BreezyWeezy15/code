@@ -11,7 +11,7 @@ data class CharacterEntity(
     val status: String,
     val type: String,
     val created: String,
-    val image: ByteArray // Updated to ByteArray
+    val image: ByteArray
 ) {
     @PrimaryKey(autoGenerate = true)
     var characterId: Long? = null

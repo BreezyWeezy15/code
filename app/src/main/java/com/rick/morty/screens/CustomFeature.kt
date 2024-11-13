@@ -21,6 +21,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,9 +39,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CharacterComparisonTool() {
-    var currentQuestionIndex by remember { mutableStateOf(0) }
+    var currentQuestionIndex by remember { mutableIntStateOf(0) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
-    var score by remember { mutableStateOf(0) }
+    var score by remember { mutableIntStateOf(0) }
     var isQuizCompleted by remember { mutableStateOf(false) }
     var showCorrectAnswer by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -71,7 +72,6 @@ fun CharacterComparisonTool() {
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(16.dp)
         ) {
-            // Title and Explanation Section
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -102,7 +102,6 @@ fun CharacterComparisonTool() {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Current Question Count (Left) and Score (Right)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -117,7 +116,6 @@ fun CharacterComparisonTool() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Question Text
             Text(
                 text = question.question,
                 style = MaterialTheme.typography.bodyLarge,
@@ -125,7 +123,6 @@ fun CharacterComparisonTool() {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Display options with color indicators for correct/incorrect answers
             question.options.forEach { option ->
                 OptionButton(
                     option = option,
@@ -166,7 +163,7 @@ fun OptionButton(option: String, isSelected: Boolean, isCorrect: Boolean, isWron
             .clickable(enabled = !isCorrect && !isWrong) { onClick() }
             .padding(8.dp)
             .shadow(
-                elevation = 2.dp, // Softer, lighter shadow
+                elevation = 2.dp,
                 shape = RoundedCornerShape(8.dp),
                 clip = false
             )
@@ -190,8 +187,6 @@ fun OptionButton(option: String, isSelected: Boolean, isCorrect: Boolean, isWron
         Text(text = option, style = MaterialTheme.typography.bodyMedium)
     }
 }
-
-
 
 @Composable
 fun QuizCompletionDialog(score: Int, totalQuestions: Int, onDismiss: () -> Unit) {
@@ -222,6 +217,5 @@ fun QuizCompletionDialog(score: Int, totalQuestions: Int, onDismiss: () -> Unit)
         modifier = Modifier.padding(16.dp)
     )
 }
-
 
 

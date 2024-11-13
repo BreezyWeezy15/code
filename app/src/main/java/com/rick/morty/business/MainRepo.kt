@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 interface MainRepo {
 
     suspend fun getCharacters(): Flow<DataModel>
-    // Database-related functions
     suspend fun insertCharacter(character: CharacterEntity)
     suspend fun deleteCharacter(character: CharacterEntity)
     suspend fun deleteAllCharacters()

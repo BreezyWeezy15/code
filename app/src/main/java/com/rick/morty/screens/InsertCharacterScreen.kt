@@ -50,7 +50,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
 
-    // Launch image picker
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it
@@ -66,7 +65,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Title: Create New Character
         Text(
             text = "Create New Character",
             fontWeight = FontWeight.Bold,
@@ -74,17 +72,15 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Circle image picker
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
                 .clickable { launcher.launch("image/*") },
-            contentAlignment = Alignment.Center // Ensure the content is centered within the box
+            contentAlignment = Alignment.Center
         ) {
             if (imageUri != null) {
-                // If image is picked, display it centered in the circle
                 Image(
                     painter = rememberAsyncImagePainter(imageUri),
                     contentDescription = "Selected Image",
@@ -92,12 +88,10 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                // If no image is selected, display "Pick Image" text centered
                 Text(text = "Pick Image", color = Color.White)
             }
         }
 
-        // Character Name
         OutlinedTextField(
             value = characterName,
             onValueChange = { characterName = it },
@@ -106,7 +100,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Species
         OutlinedTextField(
             value = species,
             onValueChange = { species = it },
@@ -115,7 +108,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Gender
         OutlinedTextField(
             value = gender,
             onValueChange = { gender = it },
@@ -124,7 +116,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Status
         OutlinedTextField(
             value = status,
             onValueChange = { status = it },
@@ -133,7 +124,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Type
         OutlinedTextField(
             value = characterType,
             onValueChange = { characterType = it },
@@ -142,7 +132,6 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Save button
         Button(
             onClick = {
                 if (characterName.isNotBlank() && species.isNotBlank() && gender.isNotBlank() && status.isNotBlank() && characterType.isNotBlank() && imageByteArray != null) {
@@ -152,7 +141,7 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
                         gender = gender,
                         status = status,
                         type = characterType,
-                        created = "2024-11-12", // Replace with current date logic if needed
+                        created = "2024-11-12",
                         image = imageByteArray!!
                     )
                     viewModel.insertCharacter(newCharacter)
@@ -163,15 +152,14 @@ fun InsertCharacterScreen(viewModel: MainViewModel, onCharacterInserted: () -> U
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(45.dp) // Set height to 45 dp
-                .clip(RoundedCornerShape(12.dp)) // Rounded corners for button
+                .height(45.dp)
+                .clip(RoundedCornerShape(12.dp))
         ) {
             Text(
                 text = "Save Character",
-                color = Color.White, // White text color
+                color = Color.White,
                 style = MaterialTheme.typography.button
             )
         }
     }
 }
-

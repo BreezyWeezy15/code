@@ -11,31 +11,28 @@ import javax.inject.Inject
 
 class MainRepoImpl @Inject constructor(
     private val authService: AuthService,
-    private val characterDao: CharacterDao  // DAO for local database operations
+    private val characterDao: CharacterDao
 ) : MainRepo {
 
-    // API-related function (fetch characters from the API)
     override suspend fun getCharacters(): Flow<DataModel> {
         return flow {
             emit(authService.getCharacters())
         }
     }
 
-    // Database-related functions
-
     override suspend fun insertCharacter(character: CharacterEntity) {
-        characterDao.insertCharacter(character)  // Insert a single character into the DB
+        characterDao.insertCharacter(character)
     }
 
     override suspend fun deleteCharacter(character: CharacterEntity) {
-        characterDao.deleteCharacter(character)  // Delete a specific character from the DB
+        characterDao.deleteCharacter(character)
     }
 
     override suspend fun deleteAllCharacters() {
-        characterDao.deleteAllCharacters()  // Delete all characters from the DB
+        characterDao.deleteAllCharacters()
     }
 
     override fun getAllCharactersFromDb(): Flow<List<CharacterEntity>> {
-        return characterDao.getAllCharacters()  // Retrieve all characters from the DB
+        return characterDao.getAllCharacters()
     }
 }

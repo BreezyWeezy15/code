@@ -1,5 +1,6 @@
 package com.rick.morty.business
 
+import android.net.http.HttpException
 import androidx.lifecycle.ViewModel
 import com.rick.morty.states.CharactersStates
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,16 +34,17 @@ class MainViewModel @Inject constructor(
     private fun getCharacters() {
         _characterState.value = CharactersStates.LOADING
         viewModelScope.launch {
-            mainRepoImpl.getCharacters()
-                .collectLatest { result ->
-                    try {
+            try {
+                mainRepoImpl.getCharacters()
+                    .collectLatest { result ->
                         _characterState.value = CharactersStates.SUCCESS(result)
-                    } catch (e: Exception) {
-                        _characterState.value = CharactersStates.ERROR("Failed to load characters: ${e.message}")
                     }
-                }
+            } catch (e: Exception) {
+                _characterState.value = CharactersStates.ERROR("Failed to load characters")
+            }
         }
     }
+
 
     private fun getLocalCharacters() {
         viewModelScope.launch {
@@ -66,7 +68,7 @@ class MainViewModel @Inject constructor(
 
     fun deleteAllCharacters() {
         viewModelScope.launch {
-            mainRepoImpl.deleteAllCharacters()  // Call deleteAllCharacters from the repository
+            mainRepoImpl.deleteAllCharacters()
         }
     }
 }

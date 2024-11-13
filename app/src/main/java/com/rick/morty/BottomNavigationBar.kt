@@ -19,7 +19,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         Screen.CharacterListScreen,
         Screen.CharacterScreen,
         Screen.InsertCharacterScreen,
-        Screen.CustomFeatureScreen // Add this line
+        Screen.CustomFeatureScreen
     )
 
     BottomNavigation(

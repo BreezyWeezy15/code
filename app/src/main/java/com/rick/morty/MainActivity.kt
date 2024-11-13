@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                             onCharacterInserted = { navController.popBackStack() }
                         )
                     }
-                    composable(Screen.CustomFeatureScreen.route) { // Add this block
+                    composable(Screen.CustomFeatureScreen.route) {
                         CharacterComparisonTool()
                     }
                 }
