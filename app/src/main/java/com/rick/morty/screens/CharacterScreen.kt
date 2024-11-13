@@ -242,4 +242,3 @@ fun SwipeToDismissCard(character: CharacterEntity, onDelete: () -> Unit) {
 
 
 
-

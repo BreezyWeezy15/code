@@ -27,7 +27,7 @@ class MainViewModel @Inject constructor(
 
     init {
         getCharacters()
-        getLocalCharacters()  // Get local characters from DB
+        getLocalCharacters()
     }
 
     private fun getCharacters() {
